@@ -1,0 +1,36 @@
+version: 2.1
+
+orbs: 
+  android: circleci/android@2.1.2
+
+jobs:
+  build:
+    parameters:
+      system-image:
+        type: string
+        default: system-images;android-32;google_apis;x86_64
+    executor:
+      name: android/android-machine
+      resource-class: medium
+      tag: 2022.06.1
+    working_directory: /home/circleci/project/LocationUpdatesBackgroundKotlin
+    steps:
+      - checkout:
+          path: /home/circleci/project/
+      - android/restore-gradle-cache
+      # - android/accept-licences
+      - android/start-emulator-and-run-tests:
+          post-emulator-launch-assemble-command: ./gradlew build
+          test-command: ./gradlew --help
+          system-image: << parameters.system-image >>
+
+workflows:
+  main:
+    jobs:
+      - build:
+          matrix:
+            parameters:
+              system-image:
+                - system-images;android-30;google_apis;x86
+                - system-images;android-29;google_apis;x86
+  
